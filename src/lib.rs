@@ -1,3 +1,5 @@
+wit_bindgen_wasmcloud::generate!("messaging");
+
 pub fn add(left: usize, right: usize) -> usize {
     left + right
 }
