@@ -1,0 +1,13 @@
+[package]
+name = "bindgen-test"
+version = "0.1.0"
+edition = "2021"
+description = """
+Test lib for wit-bindgen-wasmcloud
+"""
+
+[lib]
+crate-type = [ "cdylib" ]
+
+[dependencies]
+wit-bindgen-wasmcloud = { path = "../forks/wasmCloud/crates/wit-bindgen-wasmcloud" }
