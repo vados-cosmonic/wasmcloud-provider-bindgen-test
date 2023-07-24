@@ -1,16 +1,9 @@
 wit_bindgen_wasmcloud::generate!("messaging");
 
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+/// Messaging provider
+struct MessagingProvider;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+// TODO: Handler trait
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+// Export the messaging provider
+export_messaging!(MessagingProvider);
