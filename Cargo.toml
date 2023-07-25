@@ -13,7 +13,7 @@ crate-type = [ "cdylib" ]
 wit-bindgen-wasmcloud = { path = "../forks/wasmCloud/crates/wit-bindgen-wasmcloud" }
 # wasmtime is required due to how wasmtime::component::bindgen imports.
 # (ex: https://docs.rs/wasmtime/latest/wasmtime/component/macro.bindgen.html)
-# Since the wasmtime crate is used from inside, the end crate must share the import 
+# Since the wasmtime crate is used from inside, the end crate must share the import
 wasmtime = "10"
 # Serde's Serialize/Deserialize can't be re-exported
 # https://github.com/serde-rs/serde/issues/1465
