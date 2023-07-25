@@ -10,7 +10,7 @@ Test lib for wit-bindgen-wasmcloud
 crate-type = [ "cdylib" ]
 
 [dependencies]
-wit-bindgen-wasmcloud = { path = "../forks/wasmCloud/crates/wit-bindgen-wasmcloud" }
+wit-bindgen-wasmcloud = { git = "https://github.com/vados-cosmonic/wasmCloud.git", branch = "feat/wit-bindgen-wasmcloud" }
 # wasmtime is required due to how wasmtime::component::bindgen imports.
 # (ex: https://docs.rs/wasmtime/latest/wasmtime/component/macro.bindgen.html)
 # Since the wasmtime crate is used from inside, the end crate must share the import
