@@ -10,11 +10,25 @@ Test lib for wit-bindgen-wasmcloud
 crate-type = [ "cdylib" ]
 
 [dependencies]
-wit-bindgen-wasmcloud = { git = "https://github.com/vados-cosmonic/wasmCloud.git", branch = "feat/wit-bindgen-wasmcloud" }
+
+#wit-bindgen-wasmcloud = { git = "https://github.com/vados-cosmonic/wasmCloud.git", branch = "feat/wit-bindgen-wasmcloud" }
+#wit-bindgen-wasmcloud = { path = "../forks/wasmCloud/crates/wit-bindgen-wasmcloud", features = [ "debug" ] }
+wasmcloud-provider-macros = { path = "../forks/wasmCloud/crates/wasmcloud-provider-macros", features = [ "debug" ] }
+provider-sdk = { path = "../forks/wasmCloud/crates/provider-sdk" }
+
+# NOTE: required due to codegen'd ProivderHandler implementation
+async-trait = "0.1.72"
+
+## NOTE: required due to use during macro (*inside* vendored version of wit-bindgen -- we can't affect this)
+wit-bindgen = "0.9.0"
+
 # wasmtime is required due to how wasmtime::component::bindgen imports.
 # (ex: https://docs.rs/wasmtime/latest/wasmtime/component/macro.bindgen.html)
 # Since the wasmtime crate is used from inside, the end crate must share the import
-wasmtime = "10"
+#wasmtime = "10"
+
 # Serde's Serialize/Deserialize can't be re-exported
 # https://github.com/serde-rs/serde/issues/1465
 serde = { version = "1.0.175", features = ["derive"] }
+#tracing = "0.1.37"
+#tracing-futures = "0.2.5"
