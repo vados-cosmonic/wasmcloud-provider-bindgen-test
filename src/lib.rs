@@ -2,7 +2,9 @@
 // https://github.com/thomastaylor312/nats-messaging-wit
 
 use provider_sdk::core::LinkDefinition;
-use wasmcloud::messaging::types::BrokerMessage;
+
+// TODO: fix import of this
+// use wasmcloud::messaging::types::BrokerMessage;
 
 // FORMAT: Struct, contract, ...wit_bindgen optionss
 wasmcloud_provider_macros::generate!(MessagingProvider, "wasmcloud:messaging", "messaging");
@@ -11,11 +13,21 @@ wasmcloud_provider_macros::generate!(MessagingProvider, "wasmcloud:messaging", "
 struct MessagingProvider;
 
 impl MessagingProvider {
-    async fn _put_link(&self, ld: &LinkDefinition) {}
+    ////////////////////////////////
+    // Wasmcloud-internal methods //
+    ////////////////////////////////
+
+    async fn _put_link(&self, ld: &LinkDefinition) -> bool {
+        true
+    }
 
     async fn _delete_link(&self, actor_id: &str) {}
 
     async fn _shutdown(&self) {}
+
+    /////////////////////////
+    // Related to Consumer //
+    /////////////////////////
 
     async fn request(
         &self,
@@ -23,7 +35,8 @@ impl MessagingProvider {
         subject: String,
         body: Option<Vec<u8>>,
         timeout_ms: u32,
-    ) {
+    ) -> Result<BrokerMessage, String> {
+        Err("Not Implemented".into())
     }
 
     async fn request_multi(
@@ -33,15 +46,11 @@ impl MessagingProvider {
         body: Option<Vec<u8>>,
         timeout_ms: u32,
         max_results: u32,
-    ) {
+    ) -> Result<Vec<BrokerMessage>, String> {
+        Err("Not Implemented".into())
     }
 
-    async fn publish(&self, ctx: provider_sdk::Context, msg: BrokerMessage) {}
-
-    // fn handle_message(
-    //     &self,
-    //     msg: crate::exports::wasmcloud::messaging::handler::BrokerMessage,
-    // ) -> Result<(), String> {
-    //     Ok(())
-    // }
+    async fn publish(&self, ctx: provider_sdk::Context, msg: BrokerMessage) -> Result<(), String> {
+            Err("Not Implemented".into())
+    }
 }
