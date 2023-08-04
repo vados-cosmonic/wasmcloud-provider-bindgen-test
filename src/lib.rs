@@ -1,10 +1,8 @@
-use provider_sdk::core::LinkDefinition;
-
-// TODO(FIX): the import below clashes with a `use ...` call from codegen
-// use wasmcloud::messaging::types::BrokerMessage;
-
 // FORMAT: Struct, contract, ...wit_bindgen optionss
 wasmcloud_provider_macros::generate!(MessagingProvider, "wasmcloud:messaging", "messaging");
+
+use provider_sdk::core::LinkDefinition;
+use wasmcloud::messaging::types::BrokerMessage;
 
 /// Messaging provider
 struct MessagingProvider;
