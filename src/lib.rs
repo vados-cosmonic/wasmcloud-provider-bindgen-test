@@ -1,9 +1,6 @@
-// NOTE: all this code is borrowed from the WIT-ified provider done by thomastaylor312
-// https://github.com/thomastaylor312/nats-messaging-wit
-
 use provider_sdk::core::LinkDefinition;
 
-// TODO: fix import of this
+// TODO(FIX): the import below clashes with a `use ...` call from codegen
 // use wasmcloud::messaging::types::BrokerMessage;
 
 // FORMAT: Struct, contract, ...wit_bindgen optionss
@@ -51,6 +48,6 @@ impl MessagingProvider {
     }
 
     async fn publish(&self, ctx: provider_sdk::Context, msg: BrokerMessage) -> Result<(), String> {
-            Err("Not Implemented".into())
+        Err("Not Implemented".into())
     }
 }
