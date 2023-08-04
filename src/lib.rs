@@ -1,5 +1,5 @@
-// FORMAT: Struct, contract, ...wit_bindgen optionss
-wasmcloud_provider_macros::generate!(MessagingProvider, "wasmcloud:messaging", "messaging");
+// FORMAT: generate!(impl Struct, ...wit_bindgen options)
+wasmcloud_provider_macros::generate!(MessagingProvider, "messaging");
 
 use provider_sdk::core::LinkDefinition;
 use wasmcloud::messaging::types::BrokerMessage;
@@ -12,11 +12,11 @@ impl MessagingProvider {
     // Wasmcloud-internal methods //
     ////////////////////////////////
 
-    async fn _put_link(&self, ld: &LinkDefinition) -> bool {
+    async fn _put_link(&self, _ld: &LinkDefinition) -> bool {
         true
     }
 
-    async fn _delete_link(&self, actor_id: &str) {}
+    async fn _delete_link(&self, _actor_id: &str) {}
 
     async fn _shutdown(&self) {}
 
@@ -26,26 +26,40 @@ impl MessagingProvider {
 
     async fn request(
         &self,
-        ctx: provider_sdk::Context,
-        subject: String,
-        body: Option<Vec<u8>>,
-        timeout_ms: u32,
+        _ctx: provider_sdk::Context,
+        _subject: String,
+        _body: Option<Vec<u8>>,
+        _timeout_ms: u32,
     ) -> Result<BrokerMessage, String> {
         Err("Not Implemented".into())
     }
 
     async fn request_multi(
         &self,
-        ctx: provider_sdk::Context,
-        subject: String,
-        body: Option<Vec<u8>>,
-        timeout_ms: u32,
-        max_results: u32,
+        _ctx: provider_sdk::Context,
+        _subject: String,
+        _body: Option<Vec<u8>>,
+        _timeout_ms: u32,
+        _max_results: u32,
     ) -> Result<Vec<BrokerMessage>, String> {
         Err("Not Implemented".into())
     }
 
-    async fn publish(&self, ctx: provider_sdk::Context, msg: BrokerMessage) -> Result<(), String> {
+    async fn publish(
+        &self,
+        _ctx: provider_sdk::Context,
+        _msg: BrokerMessage,
+    ) -> Result<(), String> {
         Err("Not Implemented".into())
     }
 }
+
+impl crate::exports::wasmcloud::messaging::handler::Handler for MessagingProvider {
+    fn handle_message(
+        _msg: exports::wasmcloud::messaging::handler::BrokerMessage,
+    ) -> Result<(), wit_bindgen::rt::string::String> {
+        todo!()
+    }
+}
+
+export_messaging!(MessagingProvider);
