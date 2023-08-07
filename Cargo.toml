@@ -7,9 +7,8 @@ Test lib for wit-bindgen-wasmcloud
 """
 
 [dependencies]
-
 wasmcloud-provider-macros = { path = "../forks/wasmCloud/crates/wasmcloud-provider-macros" } # , features = [ "debug" ] }
-provider-sdk = { path = "../forks/wasmCloud/crates/provider-sdk" }
+wasmcloud-provider-sdk = { git = "https://github.com/wasmCloud/wasmCloud.git", branch = "main" }
 
 ## NOTE: required due to codegen'd ProivderHandler implementation
 async-trait = "0.1.72"

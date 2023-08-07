@@ -1,7 +1,7 @@
 // FORMAT: generate!(impl Struct, ...wit_bindgen options)
 wasmcloud_provider_macros::generate!(MessagingProvider, "messaging");
 
-use provider_sdk::core::LinkDefinition;
+use wasmcloud_provider_sdk::core::LinkDefinition;
 use wasmcloud::messaging::types::BrokerMessage;
 
 /// Messaging provider
@@ -26,7 +26,7 @@ impl MessagingProvider {
 
     async fn request(
         &self,
-        _ctx: provider_sdk::Context,
+        _ctx: wasmcloud_provider_sdk::Context,
         _subject: String,
         _body: Option<Vec<u8>>,
         _timeout_ms: u32,
@@ -36,7 +36,7 @@ impl MessagingProvider {
 
     async fn request_multi(
         &self,
-        _ctx: provider_sdk::Context,
+        _ctx: wasmcloud_provider_sdk::Context,
         _subject: String,
         _body: Option<Vec<u8>>,
         _timeout_ms: u32,
@@ -47,7 +47,7 @@ impl MessagingProvider {
 
     async fn publish(
         &self,
-        _ctx: provider_sdk::Context,
+        _ctx: wasmcloud_provider_sdk::Context,
         _msg: BrokerMessage,
     ) -> Result<(), String> {
         Err("Not Implemented".into())
