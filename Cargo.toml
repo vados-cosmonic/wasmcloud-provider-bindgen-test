@@ -7,7 +7,13 @@ Test lib for wit-bindgen-wasmcloud
 """
 
 [dependencies]
-wasmcloud-provider-macros = { path = "../forks/wasmCloud/crates/wasmcloud-provider-macros" } # , features = [ "debug" ] }
+# Guest specific
+#wasmcloud-provider-guest-macros = { path = "../forks/wasmCloud/crates/wasmcloud-provider-guest-macros" } # , features = [ "debug" ] }
+
+# Host specific
+wit-bindgen-wasmcloud-provider-host = { path = "../wit-bindgen-wasmcloud-provider-host" } # , features = [ "debug" ] }
+wasmtime = { version = "11.0.1", features = [ "component-model" ]}
+
 wasmcloud-provider-sdk = { git = "https://github.com/wasmCloud/wasmCloud.git", branch = "main" }
 
 ## NOTE: required due to codegen'd ProivderHandler implementation
@@ -23,3 +29,32 @@ serde = { version = "1.0.175", features = ["derive"] }
 ## At some point, for otel support
 #tracing = "0.1.37"
 #tracing-futures = "0.2.5"
+
+anyhow = "1"
+async-nats = "0.30"
+atty = "0.2"
+base64 = "0.21"
+bytes = "1.0"
+chrono = "0.4"
+crossbeam="0.8"
+futures = "0.3"
+once_cell = "1.8"
+rmp-serde = "1.1.0"
+serde_bytes = "0.11"
+serde_json = "1.0"
+thiserror = "1.0"
+tokio = { version = "1", features = ["full"] }
+toml = "0.7"
+tracing = "0.1"
+tracing-futures = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+wascap = "0.10"
+
+# [[bin]]
+# name = "nats_messaging"
+# path = "src/main.rs"
+
+[profile.release]
+strip = true
+opt-level = "z"
+lto = true
