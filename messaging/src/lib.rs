@@ -1,6 +1,3 @@
-// // FORMAT: generate!(impl Struct, ...wit_bindgen options)
-// wasmcloud_provider_guest_macros::generate!(MessagingProvider, "messaging");
-
 wit_bindgen_wasmcloud_provider_host::generate!(
     MessagingProvider,
     "wasmcloud:messaging",
