@@ -77,5 +77,3 @@ impl WasmcloudCapabilityProvider for MessagingProvider {
         // TODO
     }
 }
-
-// export_messaging!(MessagingProvider);

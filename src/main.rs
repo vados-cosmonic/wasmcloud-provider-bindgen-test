@@ -5,17 +5,17 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 use async_trait::async_trait;
 use base64::Engine;
 use futures::StreamExt;
-use wasmcloud_provider_sdk::{
-    core::{HostData, LinkDefinition},
-    error::{ProviderError, ProviderResult},
-    load_host_data, start_provider, Context, ProviderHandler,
-};
 use serde::{Deserialize, Serialize};
 use tokio::sync::{OwnedSemaphorePermit, RwLock, Semaphore};
 use tokio::task::JoinHandle;
 use tracing::{debug, error, instrument, warn};
 use tracing_futures::Instrument;
 use wascap::prelude::KeyPair;
+use wasmcloud_provider_sdk::{
+    core::{HostData, LinkDefinition},
+    error::{ProviderError, ProviderResult},
+    load_host_data, start_provider, Context, ProviderHandler,
+};
 
 use wasmcloud_provider_bindgen_test::*;
 
@@ -26,6 +26,12 @@ const ENV_NATS_SUBSCRIPTION: &str = "SUBSCRIPTION";
 const ENV_NATS_URI: &str = "URI";
 const ENV_NATS_CLIENT_JWT: &str = "CLIENT_JWT";
 const ENV_NATS_CLIENT_SEED: &str = "CLIENT_SEED";
+
+//
+// NOTE(vados-cosmonic): This is broken because NatsMessagingProivder is *not* the thing being bindgen'd
+// it should be the *same* thing as the Struct being bindgened, otherwise it does not
+// fulfill ::wasmcloud_provider_sdk::MessageDispatch
+//
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // handle lattice control messages and forward rpc to the provider dispatch
@@ -404,9 +410,7 @@ impl<'a> Handler<'a> {
 
         if let Some(err) = response.error {
             // Please note that all errors used should implement ToString in order for this to work
-            Err(::wasmcloud_provider_sdk::error::ProviderInvocationError::Provider(
-                err.to_string(),
-            ))
+            Err(::wasmcloud_provider_sdk::error::ProviderInvocationError::Provider(err.to_string()))
         } else {
             Ok(())
         }
@@ -415,20 +419,29 @@ impl<'a> Handler<'a> {
 
 /// Handle Messaging methods that interact with redis
 #[async_trait]
-impl Consumer for NatsMessagingProvider {
+impl WasmcloudMessagingConsumer for NatsMessagingProvider {
     #[instrument(level = "debug", skip(self, ctx), fields(actor_id = ?ctx.actor, subject = %msg.subject))]
-    async fn publish(&self, ctx: Context, msg: BrokerMessage) -> Result<(), String> {
-        let actor_id = ctx
-            .actor
-            .as_ref()
-            .ok_or_else(|| "no actor in request".to_string())?;
+    async fn publish(
+        &self,
+        ctx: Context,
+        msg: BrokerMessage,
+    ) -> Result<Result<(), String>, wasmtime::Error> {
+        let actor_id = if let Some(id) = ctx.actor.as_ref() {
+            id
+        } else {
+            return Ok(Err("no actor in request".to_string()));
+        };
 
         // get read lock on actor-client hashmap to get the connection, then drop it
         let nats_client = {
             let _rd = self.actors.read().await;
-            let nats_bundle = _rd
-                .get(actor_id)
-                .ok_or_else(|| format!("actor not linked:{}", actor_id))?;
+
+            let nats_bundle = if let Some(bundle) = _rd.get(actor_id) {
+                bundle
+            } else {
+                return Ok(Err(format!("actor not linked:{}", actor_id)));
+            };
+
             nats_bundle.client.clone()
         };
         // TODO(thomastaylor312): Since we've removed the tracing from normal NATS messaging, we
@@ -448,7 +461,7 @@ impl Consumer for NatsMessagingProvider {
         };
 
         let _ = nats_client.flush().await;
-        res
+        Ok(res)
     }
 
     async fn request_multi(
@@ -458,7 +471,7 @@ impl Consumer for NatsMessagingProvider {
         _body: Option<Vec<u8>>,
         _timeout_ms: u32,
         _max_results: u32,
-    ) -> Result<Vec<BrokerMessage>, String> {
+    ) -> Result<Result<Vec<BrokerMessage>, String>, wasmtime::Error> {
         todo!("request_multi not implemented")
     }
 
@@ -469,17 +482,22 @@ impl Consumer for NatsMessagingProvider {
         subject: String,
         body: Option<Vec<u8>>,
         timeout_ms: u32,
-    ) -> Result<BrokerMessage, String> {
-        let actor_id = ctx
-            .actor
-            .as_ref()
-            .ok_or_else(|| "no actor in request".to_string())?;
+    ) -> Result<Result<BrokerMessage, String>, wasmtime::Error> {
+        let actor_id = if let Some(id) = ctx.actor.as_ref() {
+            id
+        } else {
+            return Ok(Err("no actor in request".to_string()));
+        };
 
         let nats_client = {
             let _rd = self.actors.read().await;
-            let nats_bundle = _rd
-                .get(actor_id)
-                .ok_or_else(|| format!("actor not linked:{}", actor_id))?;
+
+            let nats_bundle = if let Some(bundle) = _rd.get(actor_id) {
+                bundle
+            } else {
+                return Ok(Err(format!("actor not linked:{}", actor_id)));
+            };
+
             nats_bundle.client.clone()
         };
 
@@ -492,13 +510,13 @@ impl Consumer for NatsMessagingProvider {
 
         // Process results of request
         match request_with_timeout {
-            Err(_timeout_err) => Err("nats request timed out".to_string()),
-            Ok(Err(send_err)) => Err(format!("nats send error: {}", send_err)),
-            Ok(Ok(resp)) => Ok(BrokerMessage {
+            Err(_timeout_err) => Ok(Err("nats request timed out".to_string())),
+            Ok(Err(send_err)) => Ok(Err(format!("nats send error: {}", send_err))),
+            Ok(Ok(resp)) => Ok(Ok(BrokerMessage {
                 body: Some(resp.payload.into()),
                 reply_to: resp.reply,
                 subject: resp.subject,
-            }),
+            })),
         }
     }
 }
