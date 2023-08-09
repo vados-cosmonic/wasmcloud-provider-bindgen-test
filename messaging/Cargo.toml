@@ -6,15 +6,15 @@ description = """
 Test lib for wit-bindgen-wasmcloud
 """
 
+[[bin]]
+name = "nats_messaging"
+path = "src/main.rs"
+
 [dependencies]
-# Guest specific
-#wasmcloud-provider-guest-macros = { path = "../forks/wasmCloud/crates/wasmcloud-provider-guest-macros" } # , features = [ "debug" ] }
-
 # Host specific
-wit-bindgen-wasmcloud-provider-host = { path = "../wit-bindgen-wasmcloud-provider-host" } #, features = [ "debug" ] }
-wasmtime = { version = "11.0.1", features = [ "component-model" ]}
-
+wit-bindgen-wasmcloud-provider-host = { git = "https://github.com/vados-cosmonic/wit-bindgen-wasmcloud-provider-host.git" } #, features = [ "debug" ] }
 wasmcloud-provider-sdk = { git = "https://github.com/wasmCloud/wasmCloud.git", branch = "main" }
+wasmtime = { version = "11.0.1", features = [ "component-model" ]}
 
 ## NOTE: required due to codegen'd ProivderHandler implementation
 async-trait = "0.1.72"
@@ -26,10 +26,12 @@ wit-bindgen = "0.9.0"
 # https://github.com/serde-rs/serde/issues/1465
 serde = { version = "1.0.175", features = ["derive"] }
 
-## At some point, for otel support
-#tracing = "0.1.37"
-#tracing-futures = "0.2.5"
-
+# NOTE(vados-cosmonic): deps below here are due to code in main.rs (normally NOT generated)
+# but is included in this example to try to get to parity/sanity test w/ handrolled
+#
+# In the end the handrolled stuff in main.rs doesn't compile, mostly because NatsMessagingProvider is *not*
+# the impl struct that gets fed to bindgen, for some reason...
+#
 anyhow = "1"
 async-nats = "0.30"
 atty = "0.2"
@@ -50,9 +52,9 @@ tracing-futures = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 wascap = "0.10"
 
-[[bin]]
-name = "nats_messaging"
-path = "src/main.rs"
+## At some point, for otel support
+#tracing = "0.1.37"
+#tracing-futures = "0.2.5"
 
 [profile.release]
 strip = true
