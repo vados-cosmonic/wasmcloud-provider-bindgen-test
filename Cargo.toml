@@ -11,7 +11,7 @@ Test lib for wit-bindgen-wasmcloud
 #wasmcloud-provider-guest-macros = { path = "../forks/wasmCloud/crates/wasmcloud-provider-guest-macros" } # , features = [ "debug" ] }
 
 # Host specific
-wit-bindgen-wasmcloud-provider-host = { path = "../wit-bindgen-wasmcloud-provider-host" } # , features = [ "debug" ] }
+wit-bindgen-wasmcloud-provider-host = { path = "../wit-bindgen-wasmcloud-provider-host", features = [ "debug" ] }
 wasmtime = { version = "11.0.1", features = [ "component-model" ]}
 
 wasmcloud-provider-sdk = { git = "https://github.com/wasmCloud/wasmCloud.git", branch = "main" }
