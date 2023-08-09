@@ -7,8 +7,7 @@ Test lib for wit-bindgen-wasmcloud using KV contract
 """
 
 [dependencies]
-wit-bindgen-wasmcloud-provider-host = { path = "../wit-bindgen-wasmcloud-provider-host" } #, features = [ "debug" ] }
-
+wit-bindgen-wasmcloud-provider-host = { git = "https://github.com/vados-cosmonic/wit-bindgen-wasmcloud-provider-host.git" } #, features = [ "debug" ] }
 wasmcloud-provider-sdk = { git = "https://github.com/wasmCloud/wasmCloud.git", branch = "main" }
 
 ## NOTE: required due to codegen'd ProivderHandler implementation
@@ -21,7 +20,7 @@ wit-bindgen = "0.9.0"
 # https://github.com/serde-rs/serde/issues/1465
 serde = { version = "1.0.175", features = ["derive"] }
 
-# NOTE: required due to host-side codegen
+# NOTE: required due to code introduced by wasmtime component bindgen (we can't get rid of this)
 wasmtime = { version = "11.0.1", features = [ "component-model" ] }
 
 ## At some point, for otel support
