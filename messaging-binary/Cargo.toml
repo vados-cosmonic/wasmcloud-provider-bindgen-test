@@ -35,11 +35,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # wasmCloud related requirements
 wascap = "0.10"
-wit-bindgen-wasmcloud-provider-binary = { path = "../../wit-bindgen-wasmcloud-provider-binary" }
+wit-bindgen-wasmcloud-provider-binary = { path = "../../wit-bindgen-wasmcloud-provider-binary" } # , features = [ "debug" ] }
 wasmcloud-provider-sdk = { git = "https://github.com/wasmCloud/wasmCloud.git", branch = "main" }
-
-# TODO(FIX): remove this requirement, shouldn't be ending up in compiled code
-wasmtime = { version = "11.0.1", features = [ "component-model" ]}
 
 [profile.release]
 strip = true
