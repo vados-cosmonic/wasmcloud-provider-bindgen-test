@@ -1,58 +1,26 @@
 //! Nats implementation for wasmcloud:messaging.
 //!
-use std::{collections::HashMap, sync::Arc, time::Duration};
-
-use async_trait::async_trait;
-use base64::Engine;
-use futures::StreamExt;
-use serde::{Deserialize, Serialize};
-use tokio::sync::{OwnedSemaphorePermit, RwLock, Semaphore};
-use tokio::task::JoinHandle;
-use tracing::{debug, error, instrument, warn};
-use tracing_futures::Instrument;
-use wascap::prelude::KeyPair;
 use wasmcloud_provider_sdk::{
-    core::{HostData, LinkDefinition},
-    error::{ProviderError, ProviderResult},
+    core::HostData,
     load_host_data, start_provider, Context, ProviderHandler,
 };
 
-// NOTE: these are auto-created by the bindgen in lib.rs
-use messaging_binary::{WasmcloudMessagingConsumer, BrokerMessage};
-
+use messaging_binary::NatsMessagingProvider;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // handle lattice control messages and forward rpc to the provider dispatch
     // returns when provider receives a shutdown control message
     let host_data = load_host_data()?;
-    let provider = generate_provider(host_data.to_owned());
+    let provider = NatsMessagingProvider::from_host_data(host_data.to_owned());
     start_provider(provider, Some("NATS Messaging Provider".to_string()))?;
 
     eprintln!("NATS messaging provider exiting");
     Ok(())
 }
 
-fn generate_provider(host_data: HostData) -> NatsMessagingProvider {
-    if let Some(c) = host_data.config_json.as_ref() {
-        // empty string becomes the default configuration
-        if c.trim().is_empty() {
-            NatsMessagingProvider::default()
-        } else {
-            let config: ConnectionConfig = serde_json::from_str(c)
-                .expect("JSON deserialization from connection config should have worked");
-            NatsMessagingProvider {
-                default_config: config,
-                ..Default::default()
-            }
-        }
-    } else {
-        NatsMessagingProvider::default()
-    }
-}
-
 #[cfg(test)]
 mod test {
-    use crate::{generate_provider, ConnectionConfig, NatsMessagingProvider};
+    use crate::{ConnectionConfig, NatsMessagingProvider};
     use provider_sdk::{
         core::{HostData, LinkDefinition},
         ProviderHandler,
@@ -83,7 +51,7 @@ mod test {
             config_json: Some("".to_string()),
             ..Default::default()
         };
-        let prov = generate_provider(host_data);
+        let prov = NatsMessagingProvider::from_host_data(host_data);
         assert_eq!(prov.default_config, ConnectionConfig::default());
     }
 

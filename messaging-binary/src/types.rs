@@ -66,7 +66,7 @@ impl Default for ConnectionConfig {
 }
 
 impl ConnectionConfig {
-    fn new_from(values: &[(String, String)]) -> ProviderResult<ConnectionConfig> {
+    pub(crate) fn new_from(values: &[(String, String)]) -> ProviderResult<ConnectionConfig> {
         let mut config = if let Some(config_b64) = get_from_wit_map(values, "config_b64") {
             let bytes = base64::engine::general_purpose::STANDARD
                 .decode(config_b64.as_bytes())

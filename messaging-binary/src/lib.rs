@@ -14,20 +14,41 @@ use tracing::{debug, error, instrument, warn};
 use tracing_futures::Instrument;
 use wascap::prelude::KeyPair;
 
+use wasmcloud_provider_sdk::core::HostData;
 use wasmcloud_provider_sdk::{core::LinkDefinition, Context};
 
 mod types;
-use types::{ConnectionConfig, NatsClientBundle};
+pub(crate) use types::ConnectionConfig;
+use types::NatsClientBundle;
 
 /// Nats implementation for wasmcloud:messaging
 #[derive(Default, Clone)]
-struct NatsMessagingProvider {
+pub struct NatsMessagingProvider {
     // store nats connection client per actor
     actors: Arc<RwLock<HashMap<String, NatsClientBundle>>>,
-    default_config: ConnectionConfig,
+    pub(crate) default_config: ConnectionConfig,
 }
 
 impl NatsMessagingProvider {
+    /// Create a NatsMessaging Provider
+    pub fn from_host_data(host_data: HostData) -> NatsMessagingProvider {
+        if let Some(c) = host_data.config_json.as_ref() {
+            // empty string becomes the default configuration
+            if c.trim().is_empty() {
+                NatsMessagingProvider::default()
+            } else {
+                let config: ConnectionConfig = serde_json::from_str(c)
+                    .expect("JSON deserialization from connection config should have worked");
+                NatsMessagingProvider {
+                    default_config: config,
+                    ..Default::default()
+                }
+            }
+        } else {
+            NatsMessagingProvider::default()
+        }
+    }
+
     /// Attempt to connect to nats url (with jwt credentials, if provided)
     async fn connect(
         &self,
@@ -139,8 +160,8 @@ async fn dispatch_msg(
         reply_to: nats_msg.reply,
         subject: nats_msg.subject,
     };
-    let actor = Handler::new(&link_def);
-    if let Err(e) = actor.handle(msg).await {
+    let actor = InvocationHandler::new(&link_def);
+    if let Err(e) = actor.handle_message(msg).await {
         error!(
             error = %e,
             "Unable to send subscription"
