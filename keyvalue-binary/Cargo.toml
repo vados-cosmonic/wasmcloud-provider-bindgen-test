@@ -1,5 +1,5 @@
 [package]
-name = "messaging-binary"
+name = "keyvalue-binary"
 version = "0.1.0"
 edition = "2021"
 publish = false
@@ -8,7 +8,7 @@ An example provider that uses wasmcloud provider bindgen to generate a binary pr
 """
 
 [[bin]]
-name = "nats_messaging"
+name = "keyvalue"
 path = "src/main.rs"
 
 [dependencies]
