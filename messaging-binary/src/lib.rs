@@ -15,6 +15,7 @@ use tracing_futures::Instrument;
 use wascap::prelude::KeyPair;
 
 use wasmcloud_provider_sdk::core::HostData;
+use wasmcloud_provider_sdk::error::ProviderResult;
 use wasmcloud_provider_sdk::{core::LinkDefinition, Context};
 
 mod types;
@@ -180,11 +181,11 @@ async fn dispatch_msg(
 #[async_trait]
 impl WasmcloudMessagingConsumer for NatsMessagingProvider {
     #[instrument(level = "debug", skip(self, ctx), fields(actor_id = ?ctx.actor, subject = %msg.subject))]
-    async fn publish(&self, ctx: Context, msg: BrokerMessage) -> Result<(), String> {
+    async fn publish(&self, ctx: Context, msg: BrokerMessage) -> ProviderResult<Result<(), String>> {
         let actor_id = if let Some(id) = ctx.actor.as_ref() {
             id
         } else {
-            return Err("no actor in request".to_string());
+            return Ok(Err("no actor in request".to_string()));
         };
 
         // get read lock on actor-client hashmap to get the connection, then drop it
@@ -194,7 +195,7 @@ impl WasmcloudMessagingConsumer for NatsMessagingProvider {
             let nats_bundle = if let Some(bundle) = _rd.get(actor_id) {
                 bundle
             } else {
-                return Err(format!("actor not linked:{}", actor_id));
+                return Ok(Err(format!("actor not linked:{}", actor_id)));
             };
 
             nats_bundle.client.clone()
@@ -216,7 +217,7 @@ impl WasmcloudMessagingConsumer for NatsMessagingProvider {
         };
 
         let _ = nats_client.flush().await;
-        res
+        Ok(res)
     }
 
     async fn request_multi(
@@ -226,7 +227,7 @@ impl WasmcloudMessagingConsumer for NatsMessagingProvider {
         _body: Option<Vec<u8>>,
         _timeout_ms: u32,
         _max_results: u32,
-    ) -> Result<Vec<BrokerMessage>, String> {
+    ) -> ProviderResult<Result<Vec<BrokerMessage>, String>> {
         todo!("request_multi not implemented")
     }
 
@@ -237,11 +238,11 @@ impl WasmcloudMessagingConsumer for NatsMessagingProvider {
         subject: String,
         body: Option<Vec<u8>>,
         timeout_ms: u32,
-    ) -> Result<BrokerMessage, String> {
+    ) -> ProviderResult<Result<BrokerMessage, String>> {
         let actor_id = if let Some(id) = ctx.actor.as_ref() {
             id
         } else {
-            return Err("no actor in request".to_string());
+            return Ok(Err("no actor in request".to_string()));
         };
 
         let nats_client = {
@@ -250,7 +251,7 @@ impl WasmcloudMessagingConsumer for NatsMessagingProvider {
             let nats_bundle = if let Some(bundle) = _rd.get(actor_id) {
                 bundle
             } else {
-                return Err(format!("actor not linked:{}", actor_id));
+                return Ok(Err(format!("actor not linked:{}", actor_id)));
             };
 
             nats_bundle.client.clone()
@@ -265,13 +266,13 @@ impl WasmcloudMessagingConsumer for NatsMessagingProvider {
 
         // Process results of request
         match request_with_timeout {
-            Err(_timeout_err) => Err("nats request timed out".to_string()),
-            Ok(Err(send_err)) => Err(format!("nats send error: {}", send_err)),
-            Ok(Ok(resp)) => Ok(BrokerMessage {
+            Err(_timeout_err) => Ok(Err("nats request timed out".to_string())),
+            Ok(Err(send_err)) => Ok(Err(format!("nats send error: {}", send_err))),
+            Ok(Ok(resp)) => Ok(Ok(BrokerMessage {
                 body: Some(resp.payload.into()),
                 reply_to: resp.reply,
                 subject: resp.subject,
-            }),
+            })),
         }
     }
 }
