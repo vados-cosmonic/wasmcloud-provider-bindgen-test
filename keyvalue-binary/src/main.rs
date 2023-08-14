@@ -1,4 +1,4 @@
-//! Nats implementation for wasmcloud:messaging.
+//! Keyvalue implementation for wasmcloud:keyvalue.
 //!
 use wasmcloud_provider_sdk::start_provider;
 
